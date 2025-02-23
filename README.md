@@ -70,6 +70,86 @@ pnpm run dev
 
 Open the URL generated in your console. Once you grant permission to the app, you can start development (such as generating extensions).
 
+### **Steps To Create a Automatic Discounts using Shopify GraphiQL App**
+
+## **Step 1: Run the below query to get the function Id for your function**
+```
+query {
+  shopifyFunctions(first: 50) {
+    nodes {
+      app {
+        title
+      }
+      apiType
+      title
+      id
+    }
+  }
+}
+```
+## **Step 2: Run the below query to create automatic discount for your function**
+```
+mutation discountAutomaticAppCreate($automaticAppDiscount: DiscountAutomaticAppInput!) {
+  discountAutomaticAppCreate(automaticAppDiscount: $automaticAppDiscount) {
+    automaticAppDiscount {
+      discountId
+      combinesWith {
+        productDiscounts
+        orderDiscounts
+        shippingDiscounts
+      }
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+```
+Paste this in the **Variables** section:
+```
+{
+  "automaticAppDiscount": {
+    "title": "Volume Discount Assignment 23/2/25",
+    "combinesWith": {
+      "productDiscounts": true,
+      "orderDiscounts": true,
+      "shippingDiscounts": true
+    },
+    "functionId": "3f17af14-3ef0-4229-ad98-e12d92c6f11c",
+    "startsAt": "2025-02-13T18:01:00.000Z",
+    "endsAt": null
+  }
+}
+```
+### **Metafield Information**  
+
+Created a metafield named **`volume-discount-quantity-based`** with the type **`JSON`**.  
+
+#### **JSON Format for the Metafield:**  
+```json
+{
+  "discounts": [
+    {
+      "quantity": 2,
+      "discount": 10,
+      "message": "10% off for 2 or more"
+    },
+    {
+      "quantity": 5,
+      "discount": 20,
+      "message": "20% off for 5 or more"
+    },
+    {
+      "quantity": 10,
+      "discount": 30,
+      "message": "30% off for 10 or more"
+    }
+  ]
+}
+```
+This metafield is used to **retrieve discount information** based on the purchased quantity.
+
 ## Developer resources
 
 - [Introduction to Shopify apps](https://shopify.dev/docs/apps/getting-started)
