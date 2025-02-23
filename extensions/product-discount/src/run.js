@@ -22,48 +22,52 @@ export function run(input) {
   const discountApplication = input.cart.lines
     .map((line) => {
       if (line.merchandise.__typename === "ProductVariant") {
-        const productTag = line.merchandise.product.hasAnyTag === true;
-        const metaData = line.merchandise.product.metafield.value;
+        // Check if the product has the required tag
+        const productHasTag = line.merchandise.product.hasAnyTag === true;
+        if (!productHasTag) return null; // Skip if product doesn't have the tag
+
+        // Parse metafield data safely
+        const metaData = line.merchandise.product.metafield?.value;
         let parsedMetaData;
-        
-        if (metaData) {
-          try {
-            parsedMetaData = JSON.parse(metaData);
-          } catch (error) {
-            console.error("Error parsing metafield:", error);
-            return null;
-          }
+        try {
+          parsedMetaData = metaData ? JSON.parse(metaData) : null;
+        } catch (error) {
+          console.error("Error parsing metafield:", error);
+          return null;
         }
 
-        if (productTag && parsedMetaData?.discounts) {
-          const applicableDiscount = parsedMetaData.discounts
-            .slice()
-            .sort((a, b) => b.quantity - a.quantity)
-            .find((discount) => line.quantity >= discount.quantity);
+        // Ensure discounts exist in metafield
+        if (!parsedMetaData?.discounts) return null;
 
-          if (applicableDiscount) {            
-            return {
-              message: applicableDiscount.message,
-              targets: [
-                {
-                  cartLine: {
-                    id: line.id, 
-                  },
-                },
-              ],
-              value: {
-                percentage: {
-                  value: applicableDiscount.discount,
+        // Find the highest applicable discount
+        const applicableDiscount = parsedMetaData.discounts
+          .slice()
+          .sort((a, b) => b.quantity - a.quantity)
+          .find((discount) => line.quantity >= discount.quantity);
+
+        if (applicableDiscount) {
+          return {
+            message: applicableDiscount.message,
+            targets: [
+              {
+                cartLine: {
+                  id: line.id,
                 },
               },
-            };
-          }
+            ],
+            value: {
+              percentage: {
+                value: applicableDiscount.discount,
+              },
+            },
+          };
         }
       }
       return null;
     })
-    .filter((discount) => discount !== null);
+    .filter(Boolean); // Remove null values (lines without discounts)
 
+  // Return the discount application if at least one valid discount exists
   return discountApplication.length > 0
     ? {
         discountApplicationStrategy: DiscountApplicationStrategy.Maximum,
