@@ -1,0 +1,24 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "8a76aa00072a5f969d963d78aebdc5ae"
+application_url = "https://shopify.dev/apps/default-app-home"
+embedded = true
+name = "volume-discount-assignment"
+handle = "volume-discount-assignment-1"
+
+[webhooks]
+api_version = "2025-01"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = ""
+
+[auth]
+redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
+
+[pos]
+embedded = false
+
+[build]
+dev_store_url = "sohana-development-store.myshopify.com"
+include_config_on_deploy = true
